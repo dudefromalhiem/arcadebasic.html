@@ -13,253 +13,157 @@
             --neon-blue: #00ffff;
             --neon-yellow: #faff00;
             --bg-dark: #050505;
-            --glass-panel: rgba(20, 20, 20, 0.85);
         }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         html { scroll-behavior: smooth; }
 
         body {
             background-color: var(--bg-dark);
             color: #fff;
-            font-family: 'Rajdhani', sans-serif; /* Readable cyberpunk font */
+            font-family: 'Rajdhani', sans-serif;
             overflow-x: hidden;
         }
 
         h1, h2, h3 { font-family: 'Press Start 2P', cursive; text-transform: uppercase; }
 
-        /* --- 2. FIXED HERO BACKGROUND (The Fix) --- */
-        /* This container sits behind everything and holds the image */
+        /* --- 2. FIXED HERO BACKGROUND --- */
         #hero-fixed-layer {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100vh;
-            z-index: -1;
-            overflow: hidden;
-            background-color: #111; /* Fallback if image missing */
+            position: fixed; top: 0; left: 0; width: 100%; height: 100vh;
+            z-index: -1; overflow: hidden; background-color: #111;
         }
 
         #hero-img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            /* Initial State: Greyscale and Dark */
+            width: 100%; height: 100%; object-fit: cover;
             filter: grayscale(100%) brightness(0.3);
             transform: scale(1);
             transition: filter 0.5s ease-out, transform 0.5s ease-out;
         }
 
-        /* State when "Active" (Scrolled into view) */
         #hero-img.active {
             filter: grayscale(0%) brightness(1) drop-shadow(0 0 20px var(--neon-pink));
             transform: scale(1.05);
         }
 
         /* --- 3. SCROLL SECTIONS --- */
-        
-        /* Section 1: The "Empty" Scroll Prompt */
         .spacer-section {
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            background: transparent; /* Lets us see the dark hero initially */
-            z-index: 2;
+            height: 100vh; display: flex; flex-direction: column;
+            justify-content: center; align-items: center; z-index: 2;
         }
 
         .scroll-indicator {
-            margin-top: auto;
-            margin-bottom: 50px;
-            text-align: center;
+            margin-top: auto; margin-bottom: 50px; text-align: center;
             animation: bounce 2s infinite;
         }
         
         .scroll-text {
-            font-family: 'Press Start 2P';
-            font-size: 10px;
-            color: var(--neon-blue);
+            font-family: 'Press Start 2P'; font-size: 10px; color: var(--neon-blue);
             text-shadow: 0 0 10px var(--neon-blue);
         }
 
-        /* Section 2: The "Window" (Pure View of Hero) */
-        .hero-window-section {
-            height: 80vh; /* The gap where we see the full neon image */
-            pointer-events: none;
-        }
+        .hero-window-section { height: 80vh; pointer-events: none; }
 
-        /* Section 3: Main Content Container */
         .main-content {
-            background: var(--bg-dark);
-            position: relative;
-            z-index: 10;
-            box-shadow: 0 -50px 100px 10px #000; /* Fade in effect */
-            padding-bottom: 100px;
+            background: var(--bg-dark); position: relative; z-index: 10;
+            box-shadow: 0 -50px 100px 10px #000; padding-bottom: 100px;
             border-top: 2px solid var(--neon-pink);
         }
 
         /* --- 4. ARCADE SECTION --- */
-        .section-block {
-            padding: 80px 20px;
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
+        .section-block { padding: 80px 20px; max-width: 1200px; margin: 0 auto; }
         .section-title {
-            text-align: center;
-            font-size: 2rem;
-            margin-bottom: 50px;
-            color: var(--neon-yellow);
-            text-shadow: 4px 4px 0px #000;
+            text-align: center; font-size: 2rem; margin-bottom: 50px;
+            color: var(--neon-yellow); text-shadow: 4px 4px 0px #000;
         }
 
         .game-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
             gap: 30px;
         }
 
         .game-card {
-            background: #1a1a1a;
-            border: 2px solid #333;
-            transition: 0.3s;
-            position: relative;
-            overflow: hidden;
-            height: 300px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            background: #1a1a1a; border: 2px solid #333; transition: 0.3s;
+            position: relative; overflow: hidden; height: 300px;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; /* Indicates Clickable */
         }
 
         .game-card:hover {
-            border-color: var(--neon-blue);
-            box-shadow: 0 0 20px var(--neon-blue);
+            border-color: var(--neon-blue); box-shadow: 0 0 20px var(--neon-blue);
+            transform: translateY(-5px);
         }
 
         .game-card h3 {
-            position: absolute;
-            bottom: 0;
-            width: 100%;
-            background: rgba(0,0,0,0.8);
-            text-align: center;
-            padding: 15px;
-            font-size: 12px;
-            color: #fff;
+            position: absolute; bottom: 0; width: 100%; background: rgba(0,0,0,0.8);
+            text-align: center; padding: 15px; font-size: 12px; color: #fff;
+            pointer-events: none;
         }
 
-        /* --- 5. NEON ARENA (Booking Form) --- */
+        /* --- 5. GAME OVERLAY MODAL (NEW) --- */
+        .game-modal {
+            display: none; /* Hidden by default */
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.95); z-index: 9999;
+            flex-direction: column; align-items: center; justify-content: center;
+            backdrop-filter: blur(5px);
+        }
+
+        .game-modal.open { display: flex; }
+
+        .modal-header {
+            width: 90%; max-width: 800px; display: flex; justify-content: space-between;
+            align-items: center; margin-bottom: 10px;
+        }
+
+        .btn-close {
+            background: #ff0000; color: white; border: none; padding: 10px 20px;
+            font-family: 'Press Start 2P'; cursor: pointer; text-transform: uppercase;
+        }
+
+        .game-frame-container {
+            width: 90%; height: 70%; max-width: 800px;
+            border: 4px solid var(--neon-blue);
+            box-shadow: 0 0 30px var(--neon-blue);
+            background: #000;
+        }
+
+        iframe { width: 100%; height: 100%; border: none; }
+
+        /* --- 6. NEON ARENA & OTHER SECTIONS --- */
         .booking-container {
-            background: linear-gradient(145deg, #111, #0a0a0a);
-            border: 1px solid var(--neon-pink);
-            padding: 40px;
-            border-radius: 10px;
-            box-shadow: 0 0 30px rgba(255, 0, 222, 0.2);
+            background: linear-gradient(145deg, #111, #0a0a0a); border: 1px solid var(--neon-pink);
+            padding: 40px; border-radius: 10px; box-shadow: 0 0 30px rgba(255, 0, 222, 0.2);
         }
-
-        .form-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .form-group label {
-            font-family: 'Press Start 2P';
-            font-size: 10px;
-            margin-bottom: 10px;
-            color: var(--neon-pink);
-        }
-
-        .form-control {
-            background: #222;
-            border: 1px solid #444;
-            color: #fff;
-            padding: 15px;
-            font-family: 'Rajdhani';
-            font-size: 1.2rem;
-            outline: none;
-        }
-
-        .form-control:focus {
-            border-color: var(--neon-blue);
-            box-shadow: 0 0 10px var(--neon-blue);
-        }
-
-        .btn-submit {
-            grid-column: span 2;
-            background: var(--neon-blue);
-            color: #000;
-            font-family: 'Press Start 2P';
-            padding: 20px;
-            border: none;
-            cursor: pointer;
-            margin-top: 20px;
-            transition: 0.2s;
-        }
-
-        .btn-submit:hover {
-            background: #fff;
-            box-shadow: 0 0 20px #fff;
-            transform: scale(1.02);
-        }
-
-        /* --- 6. ABOUT US (Reviews & Location) --- */
-        .about-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 50px;
-        }
-
-        .story-box p {
-            font-size: 1.2rem;
-            line-height: 1.6;
-            margin-bottom: 20px;
-            color: #ccc;
-        }
-
-        .contact-info {
-            margin-top: 30px;
-            padding: 20px;
-            border-left: 4px solid var(--neon-yellow);
-            background: rgba(255,255,255,0.05);
-        }
-
-        .review-card {
-            background: #111;
-            padding: 20px;
-            margin-bottom: 15px;
-            border-left: 2px solid var(--neon-blue);
-        }
-
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .form-group { margin-bottom: 20px; display: flex; flex-direction: column; }
+        .form-group label { font-family: 'Press Start 2P'; font-size: 10px; margin-bottom: 10px; color: var(--neon-pink); }
+        .form-control { background: #222; border: 1px solid #444; color: #fff; padding: 15px; font-family: 'Rajdhani'; font-size: 1.2rem; outline: none; }
+        .btn-submit { grid-column: span 2; background: var(--neon-blue); color: #000; font-family: 'Press Start 2P'; padding: 20px; border: none; cursor: pointer; margin-top: 20px; }
+        
+        .about-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 50px; }
+        .contact-info { margin-top: 30px; padding: 20px; border-left: 4px solid var(--neon-yellow); background: rgba(255,255,255,0.05); }
+        .review-card { background: #111; padding: 20px; margin-bottom: 15px; border-left: 2px solid var(--neon-blue); }
         .stars { color: var(--neon-yellow); margin-bottom: 5px; }
 
-        @keyframes bounce {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(10px); }
-        }
-
-        @media (max-width: 768px) {
-            .form-grid, .about-grid { grid-template-columns: 1fr; }
-            .btn-submit { grid-column: span 1; }
-        }
+        @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(10px); } }
+        @media (max-width: 768px) { .form-grid, .about-grid { grid-template-columns: 1fr; } .btn-submit { grid-column: span 1; } }
     </style>
 </head>
 <body>
 
     <div id="hero-fixed-layer">
-        <img src="Image_1.jpg" id="hero-img" alt="Neon Arcade Background">
+        <img src="image_1.jpg" id="hero-img" alt="Neon Arcade Background">
+    </div>
+
+    <div class="game-modal" id="gameModal">
+        <div class="modal-header">
+            <h2 style="font-size: 12px; color: var(--neon-yellow);">PLAYING NOW</h2>
+            <button class="btn-close" onclick="closeGame()">EXIT GAME</button>
+        </div>
+        <div class="game-frame-container">
+            <iframe id="gameFrame" src="" allowfullscreen></iframe>
+        </div>
+        <p style="margin-top: 10px; font-size: 10px; color: #aaa;">MOBILE: USE ON-SCREEN CONTROLS • PC: ARROW KEYS</p>
     </div>
 
     <div class="spacer-section">
@@ -276,61 +180,57 @@
         <section class="section-block" id="arcade">
             <h2 class="section-title">Classic Arcade</h2>
             <div class="game-grid">
-                <div class="game-card">
-                    <img src="https://placehold.co/300x300/111/yellow?text=PAC-MAN+DX" style="width:100%; height:100%; object-fit:cover; opacity:0.5;">
-                    <h3>PAC-MAN DX</h3>
+                
+                <div class="game-card" onclick="openGame('https://archive.org/embed/arcade_pacman')">
+                    <img src="https://placehold.co/300x300/111/yellow?text=PAC-MAN" style="width:100%; height:100%; object-fit:cover; opacity:0.5;">
+                    <h3>PAC-MAN</h3>
                 </div>
-                <div class="game-card">
+
+                <div class="game-card" onclick="openGame('https://archive.org/embed/arcade_sf2')">
                     <img src="https://placehold.co/300x300/111/red?text=STREET+FIGHTER" style="width:100%; height:100%; object-fit:cover; opacity:0.5;">
                     <h3>STREET FIGHTER II</h3>
                 </div>
-                <div class="game-card">
+
+                <div class="game-card" onclick="openGame('https://archive.org/embed/arcade_galaga')">
                     <img src="https://placehold.co/300x300/111/blue?text=GALAGA" style="width:100%; height:100%; object-fit:cover; opacity:0.5;">
-                    <h3>GALAGA '88</h3>
+                    <h3>GALAGA</h3>
                 </div>
-                <div class="game-card">
-                    <img src="https://placehold.co/300x300/111/green?text=TMNT" style="width:100%; height:100%; object-fit:cover; opacity:0.5;">
-                    <h3>TMNT: TURTLES IN TIME</h3>
+
+                <div class="game-card" onclick="openGame('https://archive.org/embed/arcade_dkong')">
+                    <img src="https://placehold.co/300x300/111/green?text=DONKEY+KONG" style="width:100%; height:100%; object-fit:cover; opacity:0.5;">
+                    <h3>DONKEY KONG</h3>
                 </div>
             </div>
+            <p style="text-align: center; margin-top: 20px; font-size: 10px; color: #666;">* CLICK GAME TO START *</p>
         </section>
 
         <section class="section-block" id="neon-arena">
             <h2 class="section-title" style="color: var(--neon-pink); text-shadow: 4px 4px 0 #000;">Neon Arena</h2>
-            <p style="text-align:center; margin-bottom:30px;">SECURE YOUR LASER TAG SESSION</p>
-            
             <div class="booking-container">
                 <form action="/api/book-arena" method="POST">
                     <div class="form-grid">
-                        
                         <div class="form-group">
-                            <label for="date">DATE & TIME</label>
-                            <input type="datetime-local" id="date" name="booking_time" class="form-control" required>
+                            <label>DATE & TIME</label>
+                            <input type="datetime-local" name="booking_time" class="form-control" required>
                         </div>
-
                         <div class="form-group">
-                            <label for="players">OPERATIVES (PLAYERS)</label>
-                            <input type="number" id="players" name="player_count" min="2" max="20" class="form-control" placeholder="2 - 20" required>
+                            <label>OPERATIVES</label>
+                            <input type="number" name="player_count" min="2" max="20" class="form-control" placeholder="2 - 20" required>
                         </div>
-
                         <div class="form-group">
-                            <label for="duration">MISSION DURATION</label>
-                            <select id="duration" name="duration" class="form-control">
+                            <label>MISSION DURATION</label>
+                            <select name="duration" class="form-control">
                                 <option value="30">30 Minutes (Skirmish)</option>
                                 <option value="60">1 Hour (Campaign)</option>
-                                <option value="90">90 Minutes (Marathon)</option>
                             </select>
                         </div>
-
                         <div class="form-group">
-                            <label for="payment">CREDIT METHOD</label>
-                            <select id="payment" name="payment_method" class="form-control">
+                            <label>CREDIT METHOD</label>
+                            <select name="payment_method" class="form-control">
                                 <option value="card">Credit/Debit Card</option>
-                                <option value="crypto">Bitcoin / Ethereum</option>
                                 <option value="onsite">Pay at Counter</option>
                             </select>
                         </div>
-
                         <button type="submit" class="btn-submit">CONFIRM BOOKING</button>
                     </div>
                 </form>
@@ -339,76 +239,41 @@
 
         <section class="section-block" id="about">
             <h2 class="section-title">About The Grid</h2>
-            
             <div class="about-grid">
                 <div class="story-box">
-                    <p>
-                        Established in the digital void of 198X, <strong>THE GRID</strong> was built as a sanctuary for those who refuse to let the analog dream die. 
-                        Hidden beneath the city's concrete shell, we preserve the golden age of coin-ops and combine it with state-of-the-art laser combat simulations.
-                    </p>
-                    <p>
-                        Whether you are chasing high scores or hunting opponents in the Neon Arena, this is where the digital world bleeds into reality.
-                    </p>
-
+                    <p>Established in the digital void of 198X, <strong>THE GRID</strong> was built as a sanctuary for those who refuse to let the analog dream die.</p>
                     <div class="contact-info">
-                        <h3>// CONTACT UPLINK</h3>
-                        <br>
-                        <p>📍 <strong>LOCATION:</strong> Sector 7, 404 Glitch Boulevard, Neo-Tokyo District, CA 90210</p>
-                        <p>📧 <strong>MAIL:</strong> arcade@arcademail.com</p>
-                        <p>☎ <strong>COMM:</strong> 111-222-3334</p>
+                        <h3>// CONTACT UPLINK</h3><br>
+                        <p>📍 Sector 7, 404 Glitch Boulevard, Neo-Tokyo District</p>
+                        <p>📧 arcade@arcademail.com</p>
+                        <p>☎ 111-222-3334</p>
                     </div>
                 </div>
-
                 <div class="reviews-box">
-                    <h3 style="margin-bottom:20px; font-size:14px;">USER LOGS:</h3>
-                    
                     <div class="review-card">
                         <div class="stars">★★★★★</div>
-                        <p>"The Neon Arena is insane. The fog effects and UV lights make you feel like you're actually in a video game."</p>
+                        <p>"The Neon Arena is insane. Best collection of vintage cabinets."</p>
                         <small>- CyberPunk_88</small>
                     </div>
-
-                    <div class="review-card">
-                        <div class="stars">★★★★★</div>
-                        <p>"Best collection of vintage cabinets I've found on the west coast. The vibe is immaculate."</p>
-                        <small>- RetroRalph</small>
-                    </div>
-
                     <div class="review-card">
                         <div class="stars">★★★★☆</div>
-                        <p>"Hard to find the entrance, but totally worth it. The pizza is pixel perfect."</p>
+                        <p>"Hard to find the entrance, but totally worth it."</p>
                         <small>- GlitchHunter</small>
                     </div>
                 </div>
             </div>
         </section>
-
-        <footer style="text-align: center; padding: 20px; color: #555; font-size: 12px;">
-            © 2026 THE GRID ARCADE SYSTEM. ALL RIGHTS RESERVED.
-        </footer>
-
+        
+        <footer style="text-align: center; padding: 20px; color: #555; font-size: 12px;">© 2026 THE GRID. ALL RIGHTS RESERVED.</footer>
     </main>
 
     <script>
-        // --- ANIMATION SCRIPT ---
+        // --- SCROLL ANIMATION ---
         document.addEventListener("scroll", () => {
             const heroImg = document.getElementById('hero-img');
             const activationPoint = document.getElementById('activation-point');
-            
-            // Get position of the "window" section relative to viewport
             const rect = activationPoint.getBoundingClientRect();
-            
-            // Logic:
-            // If the activation point is entering the screen (scrolling down),
-            // we remove the greyscale filters.
-            
-            // We use the top of the viewport to calculate intensity
-            // When rect.top is near 0, we are fully viewing the image.
-            
             const windowHeight = window.innerHeight;
-            
-            // Calculate a ratio (0 to 1) based on scroll
-            // As we scroll past the first section, the ratio goes up
             let ratio = 1 - (rect.top / windowHeight);
             
             if (ratio > 0.2) {
@@ -417,6 +282,22 @@
                 heroImg.classList.remove('active');
             }
         });
+
+        // --- GAME MODAL LOGIC ---
+        const modal = document.getElementById('gameModal');
+        const iframe = document.getElementById('gameFrame');
+
+        function openGame(url) {
+            iframe.src = url; // Inject the game URL
+            modal.classList.add('open');
+            document.body.style.overflow = 'hidden'; // Stop background scrolling
+        }
+
+        function closeGame() {
+            modal.classList.remove('open');
+            iframe.src = ""; // Stop the game to save memory/audio
+            document.body.style.overflow = 'auto'; // Restore scrolling
+        }
     </script>
 </body>
 </html>

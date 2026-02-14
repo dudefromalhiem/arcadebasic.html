@@ -14,10 +14,9 @@
             box-sizing: border-box;
         }
 
-body {
-            /* A neutral dark grey that matches the studio lighting */
-            background-color: #2b2b2b;
-            
+        body {
+            /* Matches the dark grey studio background of the image */
+            background-color: #2b2b2b; 
             height: 100vh;
             width: 100vw;
             overflow: hidden;
@@ -35,34 +34,28 @@ body {
             /* The Initial Zoom Animation */
             animation: zoomInEffect 4s ease-out forwards;
             transform-origin: center center;
-            cursor: pointer; /* Suggests interactivity */
+            cursor: pointer;
         }
 
         /* The Arcade Cabinet Image */
-.arcade-img {
+        .arcade-img {
             display: block;
             height: 100%;
             width: auto;
             object-fit: contain;
-            
-            /* 1. REMOVED THE SHADOW as requested */
-            box-shadow: none; 
 
-            /* 2. THE BLENDING TRICK (CSS MASK) */
-            /* This makes the hard edges of the JPEG fade to transparent */
-            /* The image will look like it is emerging from the darkness */
+            /* --- NO SHADOWS --- */
+            box-shadow: none; 
+            
+            /* Blending: Fades the hard edges into the background color */
             -webkit-mask-image: radial-gradient(closest-side, black 60%, transparent 100%);
             mask-image: radial-gradient(closest-side, black 60%, transparent 100%);
-            
-            /* Optional: Slight brightness adjustment to match the background tone */
-            filter: brightness(0.9);
         }
 
         /* --- 3. The Screen Overlay (Text) --- */
-        /* This overlays perfectly on the CRT screen area */
         .screen-overlay {
             position: absolute;
-            /* These percentages are estimated based on your image geometry */
+            /* Approximate positioning for the CRT screen */
             top: 35%; 
             left: 23%;
             width: 53%;
@@ -73,64 +66,46 @@ body {
             justify-content: center;
             align-items: center;
             z-index: 10;
-            pointer-events: none; /* Let clicks pass through to container */
+            pointer-events: none; 
         }
 
         .start-text {
-            color: #fff; /* Bright white */
-            font-size: clamp(12px, 2vw, 24px); /* Responsive font size */
+            color: #fff;
+            font-size: clamp(12px, 2vw, 24px);
             text-align: center;
             text-transform: uppercase;
+            
+            /* Kept only the neon glow (emission), removed drop shadows */
             text-shadow: 
-                0 0 5px #fff,
-                0 0 10px #ff00de, /* Neon glow effect */
+                0 0 10px #ff00de,
                 0 0 20px #ff00de;
             
-            /* Blinking Animation */
             animation: blinker 1s linear infinite;
         }
 
         /* --- 4. Animations --- */
         @keyframes zoomInEffect {
-            0% {
-                transform: scale(0.8);
-                opacity: 0;
-            }
-            100% {
-                transform: scale(1);
-                opacity: 1;
-            }
+            0% { transform: scale(0.8); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
         }
 
         @keyframes blinker {
             50% { opacity: 0; }
         }
 
-        /* --- 5. Transition Effects (Triggered via JS) --- */
-        
-        /* The White Flash */
+        /* --- 5. Transition Effects --- */
         .flash-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: white;
-            opacity: 0;
-            pointer-events: none;
-            z-index: 999;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: white; opacity: 0; pointer-events: none; z-index: 999;
             transition: opacity 0.1s ease-out;
         }
 
-        .flash-active {
-            opacity: 1;
-        }
+        .flash-active { opacity: 1; }
 
-        /* Stop blinking when user clicks */
         .stop-blink {
             animation: none !important;
             opacity: 1 !important;
-            color: #ffff00; /* Text turns yellow on click */
+            color: #ffff00;
             text-shadow: 0 0 15px #ffff00;
         }
     </style>
@@ -156,39 +131,27 @@ body {
             const audio = document.getElementById('startup-sound');
             let hasStarted = false;
 
-            // The function that runs when user interacts
             function initiateSequence() {
-                if (hasStarted) return; // Prevent double firing
+                if (hasStarted) return;
                 hasStarted = true;
 
-                // 1. Visual Feedback: Stop blinking & change color
                 startMsg.classList.add('stop-blink');
                 startMsg.innerText = "LOADING...";
 
-                // 2. Audio: Try to play sound (browsers block auto-play, so this works on click)
                 if(audio) {
                     audio.volume = 0.5;
-                    audio.play().catch(e => console.log("Audio not found or blocked"));
+                    audio.play().catch(e => console.log("Audio blocked"));
                 }
 
-                // 3. The Transition: Flash screen white then fade out
-                setTimeout(() => {
-                    flash.classList.add('flash-active'); // Flash White
-                }, 400); // Slight delay after text changes
+                setTimeout(() => { flash.classList.add('flash-active'); }, 400);
 
-                // 4. Redirect
                 setTimeout(() => {
                     window.location.href = 'home.html';
-                }, 1200); // Duration of the transition before switching pages
+                }, 1200);
             }
 
-            // Listen for Mouse Click
             document.addEventListener('click', initiateSequence);
-
-            // Listen for Any Key Press
             document.addEventListener('keydown', initiateSequence);
-            
-            // Listen for Touch on mobile
             document.addEventListener('touchstart', initiateSequence);
         });
     </script>
