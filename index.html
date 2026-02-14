@@ -15,7 +15,7 @@
         }
 
         body {
-            /* A medium grey to match the studio background of the image */
+            /* Matches the studio background of the image */
             background-color: #999999; 
             
             height: 100vh;
@@ -25,46 +25,50 @@
             justify-content: center;
             align-items: center;
             font-family: 'Press Start 2P', cursive;
+            
+            /* Make the entire page show a pointer so user knows to click */
+            cursor: pointer; 
+            
+            /* Prevent highlighting text which can block click events on mobile */
+            user-select: none;
+            -webkit-user-select: none; 
         }
 
         /* --- 2. Neon Border Frame --- */
-        /* Default style (Mobile/Tablet) - Shows the glow */
         .neon-frame {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            pointer-events: none; /* Allows clicking through the border */
+            
+            /* CRITICAL: Ensures clicks pass through this layer to the body */
+            pointer-events: none; 
             z-index: 100;
             
-            /* The Neon Glow */
             border: 6px solid #ff00de;
-            box-shadow: 
-                0 0 20px #ff00de, 
-                inset 0 0 20px #ff00de;
+            box-shadow: 0 0 20px #ff00de, inset 0 0 20px #ff00de;
         }
 
-        /* --- REMOVE NEON ON LAPTOP/DESKTOP --- */
-        /* Media query for screens wider than 1024px */
+        /* ON LAPTOP: Remove the neon frame entirely */
         @media (min-width: 1024px) {
             .neon-frame {
-                border: none;
-                box-shadow: none;
+                display: none; /* Completely removes it from layout */
             }
         }
 
         /* --- 3. The Arcade Machine Container --- */
         .arcade-container {
             position: relative;
-            /* Scale limits to ensure the whole machine fits on screen */
             height: 90vh; 
             max-width: 90vw;
-            
             display: flex;
             justify-content: center;
             align-items: center;
-            cursor: pointer;
+            
+            /* Ensure this sits above background but below overlays */
+            z-index: 50; 
+            pointer-events: none; /* Let clicks pass through to the window listener */
         }
 
         /* The Arcade Cabinet Image */
@@ -75,8 +79,6 @@
             height: auto;
             width: auto;
             object-fit: contain;
-            
-            /* Pure visibility: No shadows, no masks */
             box-shadow: none;
             filter: none;
         }
@@ -84,50 +86,37 @@
         /* --- 4. The Screen Overlay (Text) --- */
         .screen-overlay {
             position: absolute;
-            /* Positioning for the CRT screen area */
             top: 35%; 
             left: 23%;
             width: 53%;
             height: 30%;
-            
             display: flex;
             justify-content: center;
             align-items: center;
-            z-index: 10;
+            z-index: 60; /* Above the image */
         }
 
         .start-text {
             color: #fff;
             text-align: center;
             text-transform: uppercase;
-            
-            /* Default responsive sizing for mobile/tablet */
             font-size: clamp(12px, 3.5vw, 45px); 
-            
-            /* Neon Text Glow */
-            text-shadow: 
-                0 0 5px #fff,
-                0 0 10px #ff00de,
-                0 0 20px #ff00de;
-            
-            /* Blinking Animation */
+            text-shadow: 0 0 5px #fff, 0 0 10px #ff00de, 0 0 20px #ff00de;
             animation: blinker 0.8s steps(2, start) infinite;
         }
 
-        /* Specific override for Laptops/Desktops to ensure it pops */
+        /* Larger text for Laptops */
         @media (min-width: 1024px) {
             .start-text {
-                /* Larger fixed size for laptop screens */
                 font-size: 38px; 
             }
         }
 
-        /* --- 5. Animations --- */
         @keyframes blinker {
             to { visibility: hidden; }
         }
 
-        /* --- 6. Transition Effects --- */
+        /* --- 5. Transition Effects --- */
         .flash-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background-color: white; opacity: 0; pointer-events: none; z-index: 999;
@@ -151,7 +140,7 @@
 
     <div class="flash-overlay" id="flash"></div>
 
-    <div class="arcade-container" id="trigger-area">
+    <div class="arcade-container">
         <img src="Website Enter.jpg" alt="Retro Arcade Cabinet" class="arcade-img">
         
         <div class="screen-overlay">
@@ -161,4 +150,49 @@
 
     <audio id="startup-sound" src="./insert-coin.mp3"></audio>
 
-    <script
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const startMsg = document.getElementById('start-msg');
+            const flash = document.getElementById('flash');
+            const audio = document.getElementById('startup-sound');
+            let hasStarted = false;
+
+            function initiateSequence(e) {
+                // Prevent double firing if user clicks fast or touch+click fires
+                if (hasStarted) return;
+                hasStarted = true;
+
+                // 1. Visual Feedback
+                if(startMsg) {
+                    startMsg.classList.add('stop-blink');
+                    startMsg.innerText = "LOADING...";
+                }
+
+                // 2. Audio
+                if(audio) {
+                    audio.volume = 0.5;
+                    // Browsers block audio unless triggered by user interaction. 
+                    // Since this function runs on 'click', it should work.
+                    audio.play().catch(err => console.log("Audio autoplay blocked:", err));
+                }
+
+                // 3. Flash Effect
+                if(flash) {
+                    setTimeout(() => { flash.classList.add('flash-active'); }, 300);
+                }
+
+                // 4. Redirect
+                setTimeout(() => {
+                    console.log("Redirecting...");
+                    window.location.href = 'home.html';
+                }, 1000);
+            }
+
+            // Using window listener ensures clicks anywhere on the page work
+            window.addEventListener('click', initiateSequence);
+            window.addEventListener('touchstart', initiateSequence);
+            window.addEventListener('keydown', initiateSequence);
+        });
+    </script>
+</body>
+</html>
