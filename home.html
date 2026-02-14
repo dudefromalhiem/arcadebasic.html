@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arcade Main Hall</title>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    
+    <style>
+        /* --- 1. Reset & Core Styles --- */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: #050505; /* Deep black background */
+            color: #fff;
+            font-family: 'Press Start 2P', cursive;
+            overflow-x: hidden;
+        }
+
+        /* --- 2. The "Nothing" Section (Initial View) --- */
+        .intro-spacer {
+            height: 80vh; /* Takes up most of the initial screen */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background-color: #050505;
+            position: relative;
+            z-index: 2;
+        }
+
+        .scroll-prompt {
+            color: #555;
+            font-size: 12px;
+            text-transform: uppercase;
+            animation: pulse 2s infinite;
+            margin-top: auto; /* Pushes to bottom */
+            margin-bottom: 50px;
+        }
+
+        /* --- 3. The Hero Image Reveal Section --- */
+        .hero-section {
+            /* Height of the hero image view */
+            height: 100vh; 
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+            /* Need perspective for the pseudo-element parallax */
+            perspective: 1000px;
+        }
+
+        /* The Image Container - Fixed Background Effect */
+        .hero-bg {
+            position: fixed; /* Holds position while scrolling */
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            
+            /* YOUR IMAGE SOURCE HERE */
+            background-image: url('image_1.png');
+            
+            background-position: center center;
+            background-size: cover;
+            background-repeat: no-repeat;
+            
+            /* Initial State: Desaturated, dark, low contrast (The "Grey") */
+            filter: grayscale(100%) brightness(0.2) contrast(0.6) blur(2px);
+            
+            /* Smooth transition for the reveal */
+            transition: filter 1.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            
+            z-index: -1; /* Puts it behind content */
+            will-change: filter; /* Performance optimization */
+        }
+
+        /* The class added by JS when scrolled into view */
+        .hero-bg.revealed {
+            /* Final State: Full neon saturation */
+            filter: grayscale(0%) brightness(1) contrast(1.1) blur(0);
+        }
+        
+        /* A subtle gradient overlay to ensure text readability if added later */
+        .hero-overlay-gradient {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to bottom, rgba(5,5,5,1) 0%, rgba(5,5,5,0.2) 30%, rgba(5,5,5,0.2) 70%, rgba(5,5,5,1) 100%);
+            pointer-events: none;
+        }
+
+        /* --- 4. Main Content Section (Placeholder) --- */
+        .content-section {
+            background-color: #050505;
+            min-height: 100vh;
+            padding: 100px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            z-index: 2; /* sits above hero */
+            box-shadow: 0px -50px 100px 50px #050505; /* Blends the top edge */
+        }
+
+        h2 {
+            color: var(--neon-blue, #00ffff);
+            text-shadow: 0 0 10px #00ffff;
+            margin-bottom: 50px;
+            text-align: center;
+            line-height: 1.5;
+        }
+
+        /* Placeholder Menu Cards */
+        .menu-grid {
+            display: flex;
+            gap: 30px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .menu-card {
+            width: 200px;
+            height: 250px;
+            background: #111;
+            border: 2px solid #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #555;
+            font-size: 10px;
+            transition: 0.3s;
+            cursor: pointer;
+        }
+
+        .menu-card:hover {
+             border-color: #ff00de;
+             color: #fff;
+             box-shadow: 0 0 15px #ff00de;
+        }
+
+        /* --- 5. Animations --- */
+        @keyframes pulse {
+            0%, 100% { opacity: 0.4; transform: translateY(0); }
+            50% { opacity: 1; transform: translateY(10px); }
+        }
+    </style>
+</head>
+<body>
+
+    <section class="intro-spacer">
+        <div class="scroll-prompt">
+            ↓ Scroll to Enter the Hall ↓
+        </div>
+    </section>
+
+    <section class="hero-section" id="hero-trigger">
+        <div class="hero-bg" id="hero-image"></div>
+        <div class="hero-overlay-gradient"></div>
+    </section>
+
+    <section class="content-section">
+        <h2>SELECT YOUR DESTINATION</h2>
+        <div class="menu-grid">
+            <article class="menu-card">ARCADE CLASSICS</article>
+            <article class="menu-card">NEON ARENA</article>
+            <article class="menu-card">HIGH SCORES</article>
+        </div>
+    </section>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const heroTrigger = document.getElementById('hero-trigger');
+            const heroImage = document.getElementById('hero-image');
+
+            // Options for the Intersection Observer
+            const options = {
+                root: null, // use browser viewport
+                rootMargin: '0px',
+                threshold: 0.3 // Trigger when 30% of the hero section is visible
+            };
+
+            // The Observer Callback
+            const observerCallback = (entries, observer) => {
+                entries.forEach(entry => {
+                    // If the hero section is intersecting the viewport
+                    if (entry.isIntersecting) {
+                        heroImage.classList.add('revealed');
+                    } else {
+                        // Optional: Remove else block if you want it to stay revealed once shown
+                        heroImage.classList.remove('revealed');
+                    }
+                });
+            };
+
+            // Create and target the observer
+            const observer = new IntersectionObserver(observerCallback, options);
+            observer.observe(heroTrigger);
+        });
+    </script>
+</body>
+</html>

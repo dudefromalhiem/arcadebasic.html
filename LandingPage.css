@@ -1,0 +1,5 @@
+.screen-overlay {
+    top: 35%;  /* Change this to move text Up/Down */
+    left: 23%; /* Change this to move text Left/Right */
+    /* ... */
+}

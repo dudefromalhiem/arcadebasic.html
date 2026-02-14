@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arcade Entrance</title>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    
+    <style>
+        /* --- 1. Global Reset & Layout --- */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: #111; /* Dark background */
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden; /* Prevents scrollbars during zoom */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Press Start 2P', cursive;
+        }
+
+        /* --- 2. The Main Container (The Machine) --- */
+        .arcade-container {
+            position: relative;
+            height: 90vh; /* Adjusts based on screen height */
+            width: auto;
+            /* The Initial Zoom Animation */
+            animation: zoomInEffect 4s ease-out forwards;
+            transform-origin: center center;
+            cursor: pointer; /* Suggests interactivity */
+        }
+
+        /* The Arcade Cabinet Image */
+        .arcade-img {
+            display: block;
+            height: 100%;
+            width: auto;
+            object-fit: contain;
+            box-shadow: 0 0 50px rgba(0, 0, 0, 0.8); /* Depth shadow */
+        }
+
+        /* --- 3. The Screen Overlay (Text) --- */
+        /* This overlays perfectly on the CRT screen area */
+        .screen-overlay {
+            position: absolute;
+            /* These percentages are estimated based on your image geometry */
+            top: 35%; 
+            left: 23%;
+            width: 53%;
+            height: 30%;
+            
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 10;
+            pointer-events: none; /* Let clicks pass through to container */
+        }
+
+        .start-text {
+            color: #fff; /* Bright white */
+            font-size: clamp(12px, 2vw, 24px); /* Responsive font size */
+            text-align: center;
+            text-transform: uppercase;
+            text-shadow: 
+                0 0 5px #fff,
+                0 0 10px #ff00de, /* Neon glow effect */
+                0 0 20px #ff00de;
+            
+            /* Blinking Animation */
+            animation: blinker 1s linear infinite;
+        }
+
+        /* --- 4. Animations --- */
+        @keyframes zoomInEffect {
+            0% {
+                transform: scale(0.8);
+                opacity: 0;
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        @keyframes blinker {
+            50% { opacity: 0; }
+        }
+
+        /* --- 5. Transition Effects (Triggered via JS) --- */
+        
+        /* The White Flash */
+        .flash-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: white;
+            opacity: 0;
+            pointer-events: none;
+            z-index: 999;
+            transition: opacity 0.1s ease-out;
+        }
+
+        .flash-active {
+            opacity: 1;
+        }
+
+        /* Stop blinking when user clicks */
+        .stop-blink {
+            animation: none !important;
+            opacity: 1 !important;
+            color: #ffff00; /* Text turns yellow on click */
+            text-shadow: 0 0 15px #ffff00;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="flash-overlay" id="flash"></div>
+
+    <div class="arcade-container">
+        <img src="Website Enter.jpg" alt="Retro Arcade Cabinet" class="arcade-img">
+        
+        <div class="screen-overlay">
+            <h1 class="start-text" id="start-msg">PRESS TO START</h1>
+        </div>
+    </div>
+
+    <audio id="startup-sound" src="./insert-coin.mp3"></audio>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const startMsg = document.getElementById('start-msg');
+            const flash = document.getElementById('flash');
+            const audio = document.getElementById('startup-sound');
+            let hasStarted = false;
+
+            // The function that runs when user interacts
+            function initiateSequence() {
+                if (hasStarted) return; // Prevent double firing
+                hasStarted = true;
+
+                // 1. Visual Feedback: Stop blinking & change color
+                startMsg.classList.add('stop-blink');
+                startMsg.innerText = "LOADING...";
+
+                // 2. Audio: Try to play sound (browsers block auto-play, so this works on click)
+                if(audio) {
+                    audio.volume = 0.5;
+                    audio.play().catch(e => console.log("Audio not found or blocked"));
+                }
+
+                // 3. The Transition: Flash screen white then fade out
+                setTimeout(() => {
+                    flash.classList.add('flash-active'); // Flash White
+                }, 400); // Slight delay after text changes
+
+                // 4. Redirect
+                setTimeout(() => {
+                    window.location.href = 'home.html';
+                }, 1200); // Duration of the transition before switching pages
+            }
+
+            // Listen for Mouse Click
+            document.addEventListener('click', initiateSequence);
+
+            // Listen for Any Key Press
+            document.addEventListener('keydown', initiateSequence);
+            
+            // Listen for Touch on mobile
+            document.addEventListener('touchstart', initiateSequence);
+        });
+    </script>
+</body>
+</html>
