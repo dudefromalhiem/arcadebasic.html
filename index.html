@@ -14,11 +14,14 @@
             box-sizing: border-box;
         }
 
-        body {
-            background-color: #111; /* Dark background */
+body {
+            /* This gradient mimics the grey studio background of the image */
+            /* It starts grey in the center and fades to dark at the corners */
+            background: radial-gradient(circle at center, #737373 0%, #1c1c1c 90%);
+            
             height: 100vh;
             width: 100vw;
-            overflow: hidden; /* Prevents scrollbars during zoom */
+            overflow: hidden;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -37,12 +40,18 @@
         }
 
         /* The Arcade Cabinet Image */
-        .arcade-img {
+.arcade-img {
             display: block;
             height: 100%;
             width: auto;
             object-fit: contain;
-            box-shadow: 0 0 50px rgba(0, 0, 0, 0.8); /* Depth shadow */
+            
+            /* UPDATED: Cinematic Shadow & Color Grading */
+            /* This creates a deep shadow around the image to blend the hard edges */
+            box-shadow: 0 20px 80px 10px rgba(0, 0, 0, 0.9);
+            
+            /* Optional: Slight contrast boost to make the yellow pop against the grey */
+            filter: contrast(1.05) brightness(1.02);
         }
 
         /* --- 3. The Screen Overlay (Text) --- */
@@ -119,30 +128,6 @@
             opacity: 1 !important;
             color: #ffff00; /* Text turns yellow on click */
             text-shadow: 0 0 15px #ffff00;
-        }
-        .screen-overlay {
-    top: 35%;  
-    left: 23%;
-            background: radial-gradient(circle at center, #737373 0%, #1c1c1c 90%);
-            
-            height: 100vh;
-            width: 100vw;
-            overflow: hidden;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-family: 'Press Start 2P', cursive;
-        }
-
-        /* The Arcade Cabinet Image */
-        .arcade-img {
-            display: block;
-            height: 100%;
-            width: auto;
-            object-fit: contain;
-            
-            box-shadow: 0 20px 80px 10px rgba(0, 0, 0, 0.9);
-            filter: contrast(1.05) brightness(1.02);
         }
     </style>
 </head>
