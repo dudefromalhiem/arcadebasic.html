@@ -120,6 +120,30 @@
             color: #ffff00; /* Text turns yellow on click */
             text-shadow: 0 0 15px #ffff00;
         }
+        .screen-overlay {
+    top: 35%;  
+    left: 23%;
+            background: radial-gradient(circle at center, #737373 0%, #1c1c1c 90%);
+            
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Press Start 2P', cursive;
+        }
+
+        /* The Arcade Cabinet Image */
+        .arcade-img {
+            display: block;
+            height: 100%;
+            width: auto;
+            object-fit: contain;
+            
+            box-shadow: 0 20px 80px 10px rgba(0, 0, 0, 0.9);
+            filter: contrast(1.05) brightness(1.02);
+        }
     </style>
 </head>
 <body>
