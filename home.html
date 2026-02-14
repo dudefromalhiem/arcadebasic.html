@@ -15,7 +15,7 @@
             --bg-dark: #050505;
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; }
+        * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; -webkit-tap-highlight-color: transparent; }
         html { scroll-behavior: smooth; }
 
         body {
@@ -99,7 +99,7 @@
             pointer-events: none;
         }
 
-        /* --- 5. GAME OVERLAY MODAL (CUSTOM ENGINE) --- */
+        /* --- 5. GAME OVERLAY MODAL --- */
         .game-modal {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: #000; z-index: 9999; flex-direction: column; 
@@ -113,11 +113,38 @@
             padding: 10px; color: var(--neon-yellow); font-family: 'Press Start 2P'; font-size: 12px;
         }
 
+        .canvas-container {
+            position: relative;
+        }
+
         canvas {
             background: #111; border: 2px solid var(--neon-blue);
             box-shadow: 0 0 20px var(--neon-blue);
-            max-width: 100%; max-height: 70vh;
+            max-width: 100%; max-height: 60vh;
+            display: block;
         }
+
+        /* GAME OVER SCREEN */
+        .game-over-screen {
+            display: none; /* Hidden by default */
+            position: absolute;
+            top: 50%; left: 50%; transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.9);
+            border: 2px solid #ff0000;
+            padding: 30px;
+            text-align: center;
+            flex-direction: column;
+            gap: 20px;
+            z-index: 10;
+            box-shadow: 0 0 30px #ff0000;
+        }
+        
+        .game-over-screen h2 { color: #ff0000; margin-bottom: 10px; }
+        .game-over-screen button {
+            background: var(--neon-blue); color: #000; border: none;
+            padding: 10px 20px; font-family: 'Press Start 2P'; cursor: pointer;
+        }
+        .game-over-screen button:hover { background: #fff; }
 
         /* Mobile Controls */
         .controls-area {
@@ -134,20 +161,24 @@
             display: flex; justify-content: center; align-items: center;
             cursor: pointer; user-select: none;
         }
-        .ctrl-btn:active { background: var(--neon-pink); border-color: #fff; }
+        
+        .ctrl-btn:active, .ctrl-btn.pressed { 
+            background: var(--neon-pink); border-color: #fff; 
+        }
 
         .action-btn {
             width: 70px; height: 70px; border-radius: 50%; background: #ff0000;
             border: 4px solid #880000; color: white; font-weight: bold;
+            display: flex; justify-content: center; align-items: center;
         }
-        .action-btn:active { background: #ff5555; }
+        .action-btn:active, .action-btn.pressed { background: #ff5555; }
 
         .btn-close {
             background: transparent; color: #fff; border: 1px solid #fff; 
             padding: 5px 10px; cursor: pointer; font-family: 'Press Start 2P';
         }
 
-        /* --- 6. NEON ARENA & OTHERS --- */
+        /* --- 6. FORM & OTHERS --- */
         .booking-container {
             background: linear-gradient(145deg, #111, #0a0a0a); border: 1px solid var(--neon-pink);
             padding: 40px; border-radius: 10px; box-shadow: 0 0 30px rgba(255, 0, 222, 0.2);
@@ -157,13 +188,11 @@
         .form-group label { font-family: 'Press Start 2P'; font-size: 10px; margin-bottom: 10px; color: var(--neon-pink); }
         .form-control { background: #222; border: 1px solid #444; color: #fff; padding: 15px; font-family: 'Rajdhani'; font-size: 1.2rem; outline: none; }
         .btn-submit { grid-column: span 2; background: var(--neon-blue); color: #000; font-family: 'Press Start 2P'; padding: 20px; border: none; cursor: pointer; margin-top: 20px; }
-        
         .about-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 50px; }
         .contact-info { margin-top: 30px; padding: 20px; border-left: 4px solid var(--neon-yellow); background: rgba(255,255,255,0.05); }
         .review-card { background: #111; padding: 20px; margin-bottom: 15px; border-left: 2px solid var(--neon-blue); }
         .stars { color: var(--neon-yellow); margin-bottom: 5px; }
 
-        @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(10px); } }
         @media (max-width: 768px) { .form-grid, .about-grid { grid-template-columns: 1fr; } .btn-submit { grid-column: span 1; } }
     </style>
 </head>
@@ -177,21 +206,29 @@
         <div class="game-header">
             <span id="gameTitle">GAME TITLE</span>
             <span>SCORE: <span id="scoreDisplay">0</span></span>
-            <button class="btn-close" onclick="stopGame()">EXIT</button>
+            <button class="btn-close" onclick="closeGame()">EXIT</button>
         </div>
         
-        <canvas id="gameCanvas" width="400" height="400"></canvas>
+        <div class="canvas-container">
+            <canvas id="gameCanvas" width="400" height="400"></canvas>
+            
+            <div class="game-over-screen" id="gameOverScreen">
+                <h2>GAME OVER</h2>
+                <p>FINAL SCORE: <span id="finalScore">0</span></p>
+                <button onclick="restartGame()">TRY AGAIN</button>
+            </div>
+        </div>
         
         <div class="controls-area">
             <div class="d-pad">
                 <div></div>
-                <div class="ctrl-btn" onclick="handleInput('ArrowUp')">▲</div>
+                <div class="ctrl-btn" id="btn-up">▲</div>
                 <div></div>
-                <div class="ctrl-btn" onclick="handleInput('ArrowLeft')">◀</div>
-                <div class="ctrl-btn" onclick="handleInput('ArrowDown')">▼</div>
-                <div class="ctrl-btn" onclick="handleInput('ArrowRight')">▶</div>
+                <div class="ctrl-btn" id="btn-left">◀</div>
+                <div class="ctrl-btn" id="btn-down">▼</div>
+                <div class="ctrl-btn" id="btn-right">▶</div>
             </div>
-            <button class="ctrl-btn action-btn" onclick="handleInput('Space')">A</button>
+            <button class="ctrl-btn action-btn" id="btn-action">A</button>
         </div>
         <p style="margin-top:10px; font-size:10px; color:#888;">PC: ARROWS + SPACE</p>
     </div>
@@ -206,21 +243,17 @@
     <div class="hero-window-section" id="activation-point"></div>
 
     <main class="main-content">
-        
         <section class="section-block" id="arcade">
             <h2 class="section-title">Classic Arcade</h2>
             <div class="game-grid">
-                
                 <div class="game-card" onclick="startGame('snake')">
                     <img src="https://placehold.co/300x300/111/yellow?text=NEON+SNAKE" style="width:100%; height:100%; object-fit:cover; opacity:0.5;">
                     <h3>NEON SNAKE</h3>
                 </div>
-
                 <div class="game-card" onclick="startGame('shooter')">
                     <img src="https://placehold.co/300x300/111/red?text=COSMIC+SHOOTER" style="width:100%; height:100%; object-fit:cover; opacity:0.5;">
                     <h3>COSMIC SHOOTER</h3>
                 </div>
-
                 <div class="game-card" onclick="startGame('pong')">
                     <img src="https://placehold.co/300x300/111/blue?text=PADDLE+WAR" style="width:100%; height:100%; object-fit:cover; opacity:0.5;">
                     <h3>PADDLE WAR</h3>
@@ -310,130 +343,147 @@
         const modal = document.getElementById('gameModal');
         const scoreDisplay = document.getElementById('scoreDisplay');
         const gameTitle = document.getElementById('gameTitle');
+        const actionBtn = document.getElementById('btn-action');
+        const gameOverScreen = document.getElementById('gameOverScreen');
+        const finalScoreSpan = document.getElementById('finalScore');
         
-        let gameInterval;
+        let animationFrameId;
         let currentGame = '';
         let score = 0;
-        
-        // Input State
         let keyState = {};
+        let isGameActive = false; // Flag to stop loop on death
 
-        // 1. GAME: NEON SNAKE
+        // --- 1. NEON SNAKE ---
         let snake = [];
         let food = {};
         let direction = '';
-        
+        let lastSnakeTime = 0;
+
         function initSnake() {
             snake = [{x: 10, y: 10}];
             food = {x: 15, y: 15};
             direction = 'right';
             score = 0;
-            gameInterval = setInterval(updateSnake, 100);
+            scoreDisplay.innerText = 0;
+            isGameActive = true;
+            loop();
         }
 
-        function updateSnake() {
-            // Move Head
+        function updateSnake(timestamp) {
+            if (!isGameActive) return;
+            if (timestamp - lastSnakeTime < 100) return; 
+            lastSnakeTime = timestamp;
+
             let head = { ...snake[0] };
             if(direction === 'right') head.x++;
             if(direction === 'left') head.x--;
             if(direction === 'up') head.y--;
             if(direction === 'down') head.y++;
 
-            // Wrap Walls
+            // Wall wrapping
             if(head.x < 0) head.x = 19;
             if(head.x > 19) head.x = 0;
             if(head.y < 0) head.y = 19;
             if(head.y > 19) head.y = 0;
 
-            // Check Self Collision
+            // Self Collision -> DEATH
             if(snake.some(s => s.x === head.x && s.y === head.y)) {
-                initSnake(); // Reset
-                return;
+                triggerGameOver(); return;
             }
 
             snake.unshift(head);
 
-            // Eat Food
             if(head.x === food.x && head.y === food.y) {
                 score += 10;
                 scoreDisplay.innerText = score;
-                food = {
-                    x: Math.floor(Math.random() * 20),
-                    y: Math.floor(Math.random() * 20)
-                };
+                food = { x: Math.floor(Math.random() * 20), y: Math.floor(Math.random() * 20) };
             } else {
                 snake.pop();
             }
 
-            // Draw
             ctx.fillStyle = '#000';
             ctx.fillRect(0, 0, 400, 400);
-            
-            // Draw Food
-            ctx.fillStyle = '#ff00de'; // Neon Pink
+            ctx.fillStyle = '#ff00de';
             ctx.fillRect(food.x * 20, food.y * 20, 18, 18);
-
-            // Draw Snake
-            ctx.fillStyle = '#00ffff'; // Neon Blue
-            snake.forEach(part => {
-                ctx.fillRect(part.x * 20, part.y * 20, 18, 18);
-            });
+            ctx.fillStyle = '#00ffff';
+            snake.forEach(part => ctx.fillRect(part.x * 20, part.y * 20, 18, 18));
         }
 
-        // 2. GAME: COSMIC SHOOTER
+        // --- 2. COSMIC SHOOTER ---
         let ship = {x: 180, bullets: []};
         let enemies = [];
         let enemyDir = 1;
-        
+        let lastShotTime = 0; 
+
         function initShooter() {
             ship = {x: 180, bullets: []};
             enemies = [];
             score = 0;
-            // Create Enemies
+            isGameActive = true;
+            createEnemies();
+            loop();
+        }
+
+        function createEnemies() {
+            enemies = [];
             for(let r=0; r<3; r++) {
                 for(let c=0; c<6; c++) {
                     enemies.push({x: 50 + c*50, y: 30 + r*40, alive: true});
                 }
             }
-            gameInterval = setInterval(updateShooter, 30);
         }
 
-        function updateShooter() {
+        function updateShooter(timestamp) {
+            if (!isGameActive) return;
+
             ctx.fillStyle = '#000';
             ctx.fillRect(0, 0, 400, 400);
 
-            // Move Ship
+            // Movement
             if(keyState['ArrowLeft'] && ship.x > 0) ship.x -= 5;
             if(keyState['ArrowRight'] && ship.x < 370) ship.x += 5;
+
+            // Auto-Fire
+            if(keyState['Space']) {
+                if (timestamp - lastShotTime > 150) {
+                    ship.bullets.push({x: ship.x + 14, y: 360});
+                    lastShotTime = timestamp;
+                }
+            }
 
             // Draw Ship
             ctx.fillStyle = '#00ffff';
             ctx.beginPath();
-            ctx.moveTo(ship.x, 380);
-            ctx.lineTo(ship.x+15, 360);
-            ctx.lineTo(ship.x+30, 380);
+            ctx.moveTo(ship.x, 380); ctx.lineTo(ship.x+15, 360); ctx.lineTo(ship.x+30, 380);
             ctx.fill();
 
-            // Move & Draw Bullets
+            // Bullets
             ctx.fillStyle = '#ffff00';
-            ship.bullets.forEach((b, i) => {
+            for (let i = ship.bullets.length - 1; i >= 0; i--) {
+                let b = ship.bullets[i];
                 b.y -= 8;
                 ctx.fillRect(b.x, b.y, 4, 10);
                 if(b.y < 0) ship.bullets.splice(i, 1);
-            });
+            }
 
-            // Move Enemies
+            // Enemies
             let hitWall = false;
+            let gameOverTriggered = false;
+
             enemies.forEach(e => {
                 if(!e.alive) return;
+                
+                // Move Enemy
                 e.x += 2 * enemyDir;
                 if(e.x > 370 || e.x < 10) hitWall = true;
                 
-                // Draw Enemy
+                // Check if Enemy Hit Bottom -> DEATH
+                if(e.y > 350) gameOverTriggered = true;
+
                 ctx.fillStyle = '#ff00de';
                 ctx.fillRect(e.x, e.y, 20, 20);
 
-                // Collision
+                // Collision Bullet vs Enemy
                 ship.bullets.forEach((b, bi) => {
                     if(b.x > e.x && b.x < e.x+20 && b.y > e.y && b.y < e.y+20) {
                         e.alive = false;
@@ -444,111 +494,183 @@
                 });
             });
 
+            if(gameOverTriggered) {
+                triggerGameOver(); return;
+            }
+
             if(hitWall) {
                 enemyDir *= -1;
                 enemies.forEach(e => e.y += 20);
             }
             
-            // Win Reset
-            if(enemies.every(e => !e.alive)) initShooter();
+            // New Wave
+            if(enemies.every(e => !e.alive)) {
+                createEnemies();
+                enemyDir = enemyDir > 0 ? enemyDir + 0.5 : enemyDir - 0.5; // Slight speed up on new wave
+            }
         }
 
-        // 3. GAME: PADDLE WAR (Pong)
-        let ball = {x: 200, y: 200, dx: 4, dy: 4};
+        // --- 3. PADDLE WAR (With Speed Limit) ---
+        let ball = {x: 200, y: 200, dx: 3, dy: 3};
         let paddle = {x: 160};
-        
+        const MAX_SPEED = 9; // Cap the ball speed
+
         function initPong() {
-            ball = {x: 200, y: 200, dx: 4, dy: 4};
+            ball = {x: 200, y: 200, dx: 3, dy: 3};
             paddle = {x: 160};
             score = 0;
-            gameInterval = setInterval(updatePong, 20);
+            scoreDisplay.innerText = 0;
+            isGameActive = true;
+            loop();
         }
 
         function updatePong() {
+            if (!isGameActive) return;
+
             ctx.fillStyle = '#000';
             ctx.fillRect(0, 0, 400, 400);
 
-            // Move Paddle
-            if(keyState['ArrowLeft'] && paddle.x > 0) paddle.x -= 6;
-            if(keyState['ArrowRight'] && paddle.x < 320) paddle.x += 6;
+            if(keyState['ArrowLeft'] && paddle.x > 0) paddle.x -= 5;
+            if(keyState['ArrowRight'] && paddle.x < 320) paddle.x += 5;
 
-            // Move Ball
             ball.x += ball.dx;
             ball.y += ball.dy;
 
-            // Bounce Walls
+            // Wall Collisions
             if(ball.x < 0 || ball.x > 400) ball.dx *= -1;
             if(ball.y < 0) ball.dy *= -1;
 
-            // Bounce Paddle
+            // Paddle Collision
             if(ball.y > 380 && ball.x > paddle.x && ball.x < paddle.x + 80) {
-                ball.dy *= -1;
+                // Ensure ball goes UP
+                ball.dy = -Math.abs(ball.dy); 
+                
+                // Acceleration: Increase speed by 5%
+                ball.dx *= 1.05;
+                ball.dy *= 1.05;
+
+                // LIMIT: Clamp speed to MAX_SPEED
+                if(Math.abs(ball.dx) > MAX_SPEED) ball.dx = MAX_SPEED * Math.sign(ball.dx);
+                if(Math.abs(ball.dy) > MAX_SPEED) ball.dy = MAX_SPEED * Math.sign(ball.dy);
+
                 score++;
                 scoreDisplay.innerText = score;
             }
 
-            // Lose
+            // Miss -> DEATH
             if(ball.y > 400) {
-                initPong(); // Reset
+                triggerGameOver(); return;
             }
 
-            // Draw
             ctx.fillStyle = '#00ffff';
-            ctx.fillRect(paddle.x, 380, 80, 10); // Paddle
-            
+            ctx.fillRect(paddle.x, 380, 80, 10);
             ctx.fillStyle = '#ffff00';
             ctx.beginPath();
-            ctx.arc(ball.x, ball.y, 8, 0, Math.PI*2); // Ball
+            ctx.arc(ball.x, ball.y, 8, 0, Math.PI*2);
             ctx.fill();
         }
 
-        // --- CORE FUNCTIONS ---
+        // --- CORE GAME LOOP ---
+        function loop(timestamp) {
+            if (!isGameActive) return;
+
+            if(currentGame === 'snake') updateSnake(timestamp);
+            if(currentGame === 'shooter') updateShooter(timestamp);
+            if(currentGame === 'pong') updatePong();
+            
+            if(modal.classList.contains('open')) {
+                animationFrameId = requestAnimationFrame(loop);
+            }
+        }
+
         function startGame(type) {
             modal.classList.add('open');
+            gameOverScreen.style.display = 'none'; // Ensure death screen is hidden
             document.body.style.overflow = 'hidden';
             currentGame = type;
             gameTitle.innerText = type.toUpperCase();
+            
+            // Toggle Action Button Visibility
+            if(type === 'shooter') {
+                actionBtn.style.display = 'flex';
+            } else {
+                actionBtn.style.display = 'none';
+            }
             
             if(type === 'snake') initSnake();
             if(type === 'shooter') initShooter();
             if(type === 'pong') initPong();
         }
 
-        function stopGame() {
-            clearInterval(gameInterval);
+        // --- NEW: DEATH SCREEN LOGIC ---
+        function triggerGameOver() {
+            isGameActive = false;
+            cancelAnimationFrame(animationFrameId);
+            finalScoreSpan.innerText = score;
+            gameOverScreen.style.display = 'flex'; // Show overlay
+        }
+
+        function restartGame() {
+            gameOverScreen.style.display = 'none';
+            if(currentGame === 'snake') initSnake();
+            if(currentGame === 'shooter') initShooter();
+            if(currentGame === 'pong') initPong();
+        }
+
+        function closeGame() {
+            isGameActive = false;
+            cancelAnimationFrame(animationFrameId);
             modal.classList.remove('open');
             document.body.style.overflow = 'auto';
             score = 0;
         }
 
-        // Inputs
+        // --- INPUT HANDLING ---
         window.addEventListener('keydown', (e) => {
             keyState[e.code] = true;
-            if(currentGame === 'snake') {
+            if(["ArrowUp","ArrowDown","ArrowLeft","ArrowRight"].indexOf(e.code) > -1) {
+                e.preventDefault();
+            }
+            if(currentGame === 'snake' && isGameActive) {
                 if(e.code === 'ArrowUp' && direction !== 'down') direction = 'up';
                 if(e.code === 'ArrowDown' && direction !== 'up') direction = 'down';
                 if(e.code === 'ArrowLeft' && direction !== 'right') direction = 'left';
                 if(e.code === 'ArrowRight' && direction !== 'left') direction = 'right';
             }
-            if(currentGame === 'shooter' && e.code === 'Space') {
-                ship.bullets.push({x: ship.x + 14, y: 360});
-            }
         });
-
         window.addEventListener('keyup', (e) => keyState[e.code] = false);
 
-        // Mobile Handlers
-        function handleInput(code) {
-            // Simulate Keydown
-            const eventDown = new KeyboardEvent('keydown', { code: code });
-            window.dispatchEvent(eventDown);
-            
-            // Simulate Keyup after delay
-            setTimeout(() => {
-                const eventUp = new KeyboardEvent('keyup', { code: code });
-                window.dispatchEvent(eventUp);
-            }, 100);
+        // --- TOUCH HANDLING ---
+        function bindTouch(btnId, keyCode) {
+            const btn = document.getElementById(btnId);
+            const startPress = (e) => {
+                e.preventDefault();
+                keyState[keyCode] = true;
+                btn.classList.add('pressed');
+                if(currentGame === 'snake' && isGameActive) {
+                    if(keyCode === 'ArrowUp' && direction !== 'down') direction = 'up';
+                    if(keyCode === 'ArrowDown' && direction !== 'up') direction = 'down';
+                    if(keyCode === 'ArrowLeft' && direction !== 'right') direction = 'left';
+                    if(keyCode === 'ArrowRight' && direction !== 'left') direction = 'right';
+                }
+            };
+            const endPress = (e) => {
+                e.preventDefault();
+                keyState[keyCode] = false;
+                btn.classList.remove('pressed');
+            };
+            btn.addEventListener('touchstart', startPress);
+            btn.addEventListener('touchend', endPress);
+            btn.addEventListener('mousedown', startPress);
+            btn.addEventListener('mouseup', endPress);
         }
+
+        bindTouch('btn-up', 'ArrowUp');
+        bindTouch('btn-down', 'ArrowDown');
+        bindTouch('btn-left', 'ArrowLeft');
+        bindTouch('btn-right', 'ArrowRight');
+        bindTouch('btn-action', 'Space');
+
     </script>
 </body>
 </html>
