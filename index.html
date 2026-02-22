@@ -15,7 +15,6 @@
         }
 
         body {
-            /* Matches the grey studio background of image_2.jpg */
             background-color: #9e9e9e; 
             
             height: 100vh;
@@ -26,7 +25,7 @@
             align-items: center;
             font-family: 'Press Start 2P', cursive;
             
-            /* Make the entire page show a pointer so user knows to click */
+            
             cursor: pointer; 
             
             /* Prevent highlighting text which can block click events on mobile */
@@ -37,7 +36,6 @@
         /* --- 2. The Arcade Machine Container --- */
         .arcade-container {
             position: relative;
-            /* Adjust height to fit the machine comfortably */
             height: 95vh; 
             width: 95vw;
             display: flex;
@@ -48,7 +46,6 @@
             pointer-events: none; 
         }
 
-        /* The Arcade Cabinet Image */
         .arcade-img {
             display: block;
             max-height: 100%;
@@ -59,7 +56,6 @@
         }
 
         /* --- 3. The Screen Overlay (Text) --- */
-        /* UPDATED COORDINATES FOR IMAGE_2.JPG */
         .screen-overlay {
             position: absolute;
             /* These percentages place the box exactly over the glass screen */
@@ -73,7 +69,6 @@
             align-items: center;
             z-index: 60; 
             
-            /* Optional: slight curve to match the CRT monitor */
             border-radius: 10px;
             overflow: hidden;
         }
@@ -139,10 +134,10 @@
                 // 1. Visual Feedback
                 if(startMsg) {
                     startMsg.classList.add('stop-blink');
-                    startMsg.innerHTML = "LOADING..."; // Change text to Loading
+                    startMsg.innerHTML = "LOADING...";
                 }
 
-                // 2. Audio
+                // 2. Audio just incase lmao
                 if(audio) {
                     audio.volume = 0.5;
                     audio.play().catch(err => console.log("Audio autoplay blocked:", err));
